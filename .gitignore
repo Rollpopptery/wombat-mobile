@@ -1,0 +1,54 @@
+# Flutter/Dart
+mobile/wombat2/.dart_tool/
+mobile/wombat2/.flutter-plugins
+mobile/wombat2/.flutter-plugins-dependencies
+mobile/wombat2/.packages
+mobile/wombat2/build/
+mobile/wombat2/.pub-cache/
+mobile/wombat2/.pub/
+mobile/wombat2/pubspec.lock
+
+# Android
+mobile/wombat2/android/.gradle/
+mobile/wombat2/android/local.properties
+mobile/wombat2/android/app/debug/
+mobile/wombat2/android/app/profile/
+mobile/wombat2/android/app/release/
+mobile/wombat2/android/.idea/
+mobile/wombat2/android/captures/
+mobile/wombat2/android/gradlew
+mobile/wombat2/android/gradlew.bat
+mobile/wombat2/android/gradle/wrapper/gradle-wrapper.jar
+
+# iOS
+mobile/wombat2/ios/Flutter/
+mobile/wombat2/ios/Pods/
+mobile/wombat2/ios/.symlinks/
+
+# Web
+mobile/wombat2/web/.dart_tool/
+
+# Arduino
+firmware/**/*.hex
+firmware/**/*.elf
+firmware/**/*.eep
+firmware/**/*.lst
+firmware/**/*.map
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.zip
+*.tmp
+*.log
+forclaude.txt
