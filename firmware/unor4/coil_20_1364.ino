@@ -148,95 +148,7 @@ void COIL_20_1364::targetSense()
 
 void COIL_20_1364::targetDiscrimination()
 {  
-  double tempF;
-  double tempF2;
-  int tempIndex ;;
-
-  lockedSignalCount = 0;
-  
-     for(int i = 0 ; i < TIME_POINTS; i++)
-     {
-       // calculate averages
-       //
-       tempF = 0;
-       for(int i2 = 0 ; i2 < ID_SET; i2++)
-       {
-
-         tempF += lockedSignal[i][i2] ;
-       }
-       tempF /= ID_SET;
-       signalCurve[i] = tempF;
-
-       //Serial.println(lockedSignal[i]);
-     }
-
-    //normalise(signalCurve, TIME_POINTS, TIME_POINTS-1, 0);
-
-    // this ratio is our conductivity (slope or speed of the discharge curve)
-    //
-    conductivity = signalCurve[4] / signalCurve[0] ;    
-    
-    tempF = signalCurve[7];
-    tempF += signalCurve[8];
-    tempF += signalCurve[9];
-
-    tempF /= 3.0;
-
-    iron = tempF  / signalCurve[4];
-    
-    // caluclate the IRON number using the IRON table
-    // 
-    // Is our actual value above or below this ?
-    // If above, then is iron
-    //
-    tempF = getIRONValue(conductivity);
-
-        
-    Serial.print(conductivity);
-    Serial.print(",");
-    Serial.print(iron);    
-    Serial.print(",");
-    iron -= tempF;
-    Serial.println(iron); // is it above (+iron) or below (-noniron) the line ?       
-    
-    /*
-    Serial.print("expected iron:" );
-   
-    Serial.println(tempF);
-    */
-                         
-    // Discrimination algorithm
-    //
-    TARGET_SENSE::targetID = OK_BIG;
-    if(iron > 0)
-    {
-      if((conductivity < 0.77) && (conductivity > 0.50))
-      {
-        TARGET_SENSE::targetID = Fe;
-      }
-    }
-      
-    if(TARGET_SENSE::targetID == Fe )
-    {
-             
-    }
-    else
-    {
-      // non iron target, ring the Bell
-      //
-      queueSound(BELL);   
-    }
-    
-    queueNumber(conductivity);
-
-    startSounds();
-            
-      //Serial.println(TARGET_SENSE::targetID);     
-
-      #ifdef USB_SERIAL_ENABLED
-           //  Serial.print(sampleArray[SAMPLE_COUNT_MAX-1]);  // print the last raw reading for offset adjustment
-           //  Serial.println();                
-      #endif
+  // not used
 
 }
 
@@ -244,6 +156,7 @@ void COIL_20_1364::targetDiscrimination()
 // called repeatedly every sample, i.e at up to 500Hz,
 // must be efficient
 //
+/*
 void COIL_20_1364::doSampleAveraging()
 {
   static int averageCount = 0;  
@@ -303,7 +216,7 @@ void COIL_20_1364::doSampleAveraging()
       }     
     }
 }
-
+*/
 
 // called repeatedly every sample, i.e at up to 500Hz,
 // must be efficient
@@ -355,6 +268,7 @@ void COIL_20_1364::doSampleAveragingMobile()
 
 // use the ratio to look up a value in the iron table 
 //
+/*
 float COIL_20_1364::getIRONValue(float ratio)
 {
   int index1 ;
@@ -391,6 +305,7 @@ float COIL_20_1364::getIRONValue(float ratio)
 
   return(tempF);
 }
+*/
 
 // called once per pulse, the data out the USB is being sent one sample at a time
 // interleaved with the raw sampling.

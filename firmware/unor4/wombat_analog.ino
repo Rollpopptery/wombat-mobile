@@ -21,7 +21,7 @@ The audio output A0 feeds to high impedance (i.e > 4k) audio amp
 
 
 FspTimer pulse_timer;
-
+/*
 void setup_adc(void)
 {
   // Enable ADC module clock via Module Stop Control Register
@@ -55,7 +55,7 @@ void setup_adc(void)
   // Trigger first conversion
   *ADC140_ADCSR |= (0x01 << 15);
 }
-
+*/
 void setupSample() {
   pinMode(D3, OUTPUT);
   pinMode(analogPin, INPUT);  

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/usb_service.dart';
 import 'time_screen_chart.dart';
 import 'vanwyk_chart.dart';
+import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -12,11 +13,11 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final UsbService _usbService = UsbService();
-    
+
   String _status = 'Initializing...';
   int _frameCount = 0;
-  int _linesDropped = 0;  
-  
+  int _linesDropped = 0;
+
   @override
   void initState() {
     super.initState();
@@ -25,18 +26,18 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _initializeDetector() async {
     bool connected = await _usbService.connect();
-    
+
     if (!connected) {
       setState(() {
         _status = 'Failed to connect to USB device';
       });
       return;
     }
-    
+
     setState(() {
       _status = 'Connected';
     });
-    
+
     // USB frames update counter
     _usbService.frameStream.listen((samples) {
       setState(() {
@@ -49,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() async {
     await _usbService.disconnect();
-    _usbService.dispose();   
+    _usbService.dispose();
     super.dispose();
   }
 
@@ -57,8 +58,21 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Metal Detector'),
+        title: const Text('Wombat Mobile'),
         backgroundColor: Colors.blue[900],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -91,9 +105,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
-
             const SizedBox(height: 12),
-
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -110,9 +122,7 @@ class _MainScreenState extends State<MainScreen> {
                 textStyle: const TextStyle(fontSize: 18),
               ),
             ),
-            
             const SizedBox(height: 20),
-            
             // Navigation button
             ElevatedButton.icon(
               onPressed: () {

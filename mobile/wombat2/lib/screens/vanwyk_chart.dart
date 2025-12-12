@@ -18,6 +18,11 @@ class _VanWykChartState extends State<VanWykChart> {
   int _scanCounter = 0;
   final int _scanDiv = 1;
   
+  // Running average settings
+  static const int averageWindowSize = 100;
+  static const double traceSpacing = 50.0;
+  final List<List<double>> _runningAverageBuffers = [];
+  
   // Y-axis zoom and pan state
   double? _minY;
   double? _maxY;
@@ -31,8 +36,34 @@ class _VanWykChartState extends State<VanWykChart> {
       _scanCounter++;
       if (_scanCounter % _scanDiv != 0) return;
       
+      // Initialize running average buffers if needed
+      if (_runningAverageBuffers.isEmpty && samples.isNotEmpty) {
+        for (int i = 0; i < samples.length; i++) {
+          _runningAverageBuffers.add([]);
+        }
+      }
+      
+      // Update running averages
+      for (int i = 0; i < samples.length && i < _runningAverageBuffers.length; i++) {
+        _runningAverageBuffers[i].add(samples[i]);
+        if (_runningAverageBuffers[i].length > averageWindowSize) {
+          _runningAverageBuffers[i].removeAt(0);
+        }
+      }
+      
+      // Calculate deviations from running average
+      List<double> deviations = [];
+      for (int i = 0; i < samples.length; i++) {
+        double average = _runningAverageBuffers[i].isEmpty 
+            ? samples[i] 
+            : _runningAverageBuffers[i].reduce((a, b) => a + b) / _runningAverageBuffers[i].length;
+        double deviation = samples[i] - average;
+        double stacked = deviation + ((samples.length - 1 - i) * traceSpacing);
+        deviations.add(stacked);
+      }
+      
       setState(() {
-        _scanHistory.add(samples);
+        _scanHistory.add(deviations);
         if (_scanHistory.length > maxScans) {
           _scanHistory.removeAt(0);
         }

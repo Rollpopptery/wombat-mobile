@@ -20,21 +20,12 @@ This code is "AS IS" without warranty or liability.
 
 Modifications:
 
-09-June-2024  RVW  signed int for sample array so subtract of long sample works even if long sample is greater 
-11-June-2024  RVW  'Pop' prevention on wav sounds by using ramp up or down to DAC sample
-16-June-2024  RVW  2 digit conductivity. Non Iron Bell sound
-06-July-2024  RVW  soundAlgorithm3() added
- 
+For wombat-mobile. Sound output not used
+
  
 */
  
 
-
-/*
-
-We use Triangle waves; They sound good and are simple to make
-
-*/
 
 #include <FspTimer.h>
 
@@ -109,7 +100,7 @@ class TRIANGLEWAVE {
 };
 
 
-TRIANGLEWAVE wave1;
+//TRIANGLEWAVE wave1;
 
 
 volatile uint8_t wavDivider = 0;
@@ -128,7 +119,7 @@ volatile int16_t longSample;
 // This gives an interrupt period of 25uSec
 // Because the interrupt system is complex, and the sound interrupt
 // will always clash with the PWM and pulse-width interrupt if they are independent...
-// We do everything (Pulse, Sampling and Sound) from this single 40kHz interrupt
+// We do everything (Pulse, Sampling) from this single 40kHz interrupt
 //
 //----------------------------------------------------------------------------------------------
 void timer_DACOut_Interrupt(timer_callback_args_t __attribute((unused)) *p_args)
@@ -228,7 +219,7 @@ void setup_dac(void)       // Note make sure ADC is stopped before setup DAC
 
 
 
-
+/*
 // Startup tune
 //
 void startTune() 
@@ -244,19 +235,21 @@ void startTune()
    wave1.setFrequency(freq_c1);
 }
 
-
+*/
 // Main sound setup
 // Setup the DAC, outputing on A0
 // Setup the 20kHz timer that outputs the DAC waveform
 // 
 //
+
+
 bool setup_soundWave()
 {
   uint8_t timer_type = GPT_TIMER;
   int8_t tindex = FspTimer::get_available_timer(timer_type);
 
-  wave1.setVolume(1.0);
-  wave1.setFrequency(300);  //Hz
+ // wave1.setVolume(1.0);
+ // wave1.setFrequency(300);  //Hz
 
   setup_dac();
 
@@ -292,12 +285,12 @@ bool setup_soundWave()
     return false;
   }
 
-  startTune() ;    
+ // startTune() ;    
   return true;
 }
 
 
-
+/*
 
 // adjust the sound according to signal
 // ! Called at 100Hz !
@@ -362,7 +355,8 @@ void soundAlgorithm2(double signal)
   wave1.setVolume(volume);    
 }
 
-
+*/
+/*
 // adjust the sound according to signal
 // ! Called at 100Hz !
 //
@@ -438,7 +432,8 @@ void soundAlgorithm3(double signal, float conduct_ratio)
   wave1.setVolume(volume);    
 }
 
-
+*/
+/*
 
 // convert number between 0.10 and 0.99 into a two digit sound
 //
@@ -460,7 +455,8 @@ void queueNumber(float number)
     queueSound(remainder);
   }
 }
-
+*/
+/*
 // add a wav file index to the list of wavs to be played (maximum 3)
 // use the ENUM
 void queueSound(int soundIndex)
@@ -476,6 +472,8 @@ void queueSound(int soundIndex)
   }  
 }
 
+*/
+/*
 void startSounds()
 {
   int index = SOUND_QUEUE::queue[0];
@@ -494,3 +492,4 @@ void startSounds()
   }
 
 }
+*/
