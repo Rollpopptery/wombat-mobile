@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/usb_service.dart';
+import '../services/app_settings.dart';
+import '../services/calculated_plots.dart';
+
+
 
 class VanWykChart extends StatefulWidget {
   final UsbService usbService;
@@ -43,24 +47,38 @@ class _VanWykChartState extends State<VanWykChart> {
         }
       }
       
-      // Update running averages
-      for (int i = 0; i < samples.length && i < _runningAverageBuffers.length; i++) {
-        _runningAverageBuffers[i].add(samples[i]);
-        if (_runningAverageBuffers[i].length > averageWindowSize) {
-          _runningAverageBuffers[i].removeAt(0);
-        }
-      }
-      
-      // Calculate deviations from running average
-      List<double> deviations = [];
-      for (int i = 0; i < samples.length; i++) {
-        double average = _runningAverageBuffers[i].isEmpty 
-            ? samples[i] 
-            : _runningAverageBuffers[i].reduce((a, b) => a + b) / _runningAverageBuffers[i].length;
-        double deviation = samples[i] - average;
-        double stacked = deviation + ((samples.length - 1 - i) * traceSpacing);
-        deviations.add(stacked);
-      }
+      final settings = AppSettings();
+
+// Update running averages (only for non-ignored samples)
+for (int i = 0; i < samples.length && i < _runningAverageBuffers.length; i++) {
+
+  if (settings.isSampleVisible(i)) {  
+    _runningAverageBuffers[i].add(samples[i]);
+    if (_runningAverageBuffers[i].length > averageWindowSize) {
+      _runningAverageBuffers[i].removeAt(0);
+    }
+  }
+}
+
+// Calculate deviations from running average (only for non-ignored samples)
+List<double> deviations = [];
+int displayedIndex = 0;
+for (int i = 0; i < samples.length; i++) {
+  if (settings.isSampleVisible(i)) {
+    double average = _runningAverageBuffers[i].isEmpty 
+        ? samples[i] 
+        : _runningAverageBuffers[i].reduce((a, b) => a + b) / _runningAverageBuffers[i].length;
+    double deviation = samples[i] - average;
+    double stacked = deviation + ((samples.length - 1 - displayedIndex) * traceSpacing);
+    deviations.add(stacked);
+    displayedIndex++;
+  }
+}
+
+// Add sound plot as an additional trace
+double soundValue = CalculatedPlots.calculateSoundPlot(samples, settings);
+double soundStacked = soundValue + ((samples.length - 1 - displayedIndex) * traceSpacing);
+deviations.add(soundStacked);
       
       setState(() {
         _scanHistory.add(deviations);
