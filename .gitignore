@@ -52,3 +52,5 @@ Thumbs.db
 *.tmp
 *.log
 forclaude.txt
+build/
+*.aab
