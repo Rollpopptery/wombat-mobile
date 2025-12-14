@@ -32,6 +32,8 @@ class _VanWykChartState extends State<VanWykChart> {
   double _previousScale = 1.0;
   Offset _previousFocalPoint = Offset.zero;
 
+  double _conductivityValue = 0.0;
+
   // Audio service
   final AudioService _audioService = AudioService();
   bool _audioEnabled = false;
@@ -41,8 +43,6 @@ class _VanWykChartState extends State<VanWykChart> {
     super.initState();
     _audioService.init();
     _subscription = widget.usbService.frameStream.listen((samples) {
-            
-
       _scanCounter++;
       if (_scanCounter % _scanDiv != 0) return;
       
@@ -84,13 +84,16 @@ class _VanWykChartState extends State<VanWykChart> {
       double soundValue = CalculatedPlots.calculateSoundPlot(samples, settings);
       double soundStacked = soundValue + ((samples.length - 1 - displayedIndex) * traceSpacing);
        
-      
-      // Update audio with sound plot value (second time, with processing)
+      // Calculate conductivity for display
+      double conductivityValue = CalculatedPlots.calculateConductivityPlot(samples, settings);
+
+      // Update audio with sound plot value
       if (_audioEnabled) {
         _audioService.updateSignal(soundValue);
       }
            
       deviations.add(soundStacked);
+      _conductivityValue = conductivityValue.isFinite ? conductivityValue : 0.0;
       
       setState(() {
         _scanHistory.add(deviations);
@@ -98,11 +101,6 @@ class _VanWykChartState extends State<VanWykChart> {
           _scanHistory.removeAt(0);
         }
       });
-      
-     
-
-        
-      
     });
   }
   
@@ -172,24 +170,43 @@ class _VanWykChartState extends State<VanWykChart> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: Colors.black,
-        child: _scanHistory.isEmpty
-            ? const Center(
-                child: Text(
-                  'Waiting for data...',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
-              )
-            : GestureDetector(
-                onScaleStart: _handleScaleStart,
-                onScaleUpdate: _handleScaleUpdate,
-                onScaleEnd: _handleScaleEnd,
-                child: CustomPaint(
-                  painter: ScopePainter(_scanHistory, _minY, _maxY),
-                  size: Size.infinite,
-                ),
+      body: Stack(
+        children: [
+          Container(
+            color: Colors.black,
+            child: _scanHistory.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Waiting for data...',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  )
+                : GestureDetector(
+                    onScaleStart: _handleScaleStart,
+                    onScaleUpdate: _handleScaleUpdate,
+                    onScaleEnd: _handleScaleEnd,
+                    child: CustomPaint(
+                      painter: ScopePainter(_scanHistory, _minY, _maxY),
+                      size: Size.infinite,
+                    ),
+                  ),
+          ),
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(8),
               ),
+              child: Text(
+                'C: ${_conductivityValue.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
