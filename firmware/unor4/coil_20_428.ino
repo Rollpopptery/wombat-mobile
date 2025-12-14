@@ -1,10 +1,10 @@
 /*
 ---------------------------------------------------------------------
-1364 uH coil
+428 uH coil
 
 Diameter:   20cm
-Inductance: 1364
-Turns:      58
+Inductance: 428
+Turns:      
 Wire:       0.5mm copper
 
 
@@ -13,7 +13,7 @@ Damping resistor ~
 ---------------------------------------------------------------------
 */
 
-#include "coil_20_1364.h"
+#include "coil_20_428.h"
 
 #include "voice.h"
 
@@ -21,136 +21,6 @@ Damping resistor ~
 //
 #define THRESHOLD (20)
 
-
-
-double COIL_20_1364::soundSignal()
-{
-  double tempF = 0.0;
-  tempF += (averages[0]-longAverages[0]);  // 33uSEC   
-  
- 
-  soundSignalValue = tempF;  
-
-  tempF = averages[4]-longAverages[4];
-
-  soundSignalConductivity = tempF / soundSignalValue;
-   
-  return(soundSignalValue);  // strongest response for particular coil 
-}
-
-//--------------------------------------------------------------------------------------
-// called after each set of samples, i.e at ~ 10Hz
-//
-//--------------------------------------------------------------------------------------
-void COIL_20_1364::targetSense()
-{
-  static double maxF = 0;
-    
-  double tempF = 0;  
-  double S1 ;
-  double S2 ;
-   
-  tempF = soundSignalValue;  
-
-
-  
-  if(FLAG_TARGET_ID)
-  {
-     timerTargetID++;
-
-     // we need to have held over target for at least '10' counts
-
-     if(timerTargetID < 10 )
-     {
-      
-     }
-     else
-     {
-      // we exit FLAG_TARGET_ID state when the signal falls below the locked average 
-      // looking at the earliest time-sample only
-      // i.e we moved off the target
-      //
-      if ((averages[0] - lockedAverage[0]) < 0)
-      {
-        timerTargetID = 0;
-        FLAG_TARGET_ID = false;
-      }
-
-      
-      // we are holding above the target and taking a long sample to get accurate ID
-      // stay here until we drop below running average,  OR we time-out
-      //
-
-      for(int i = 0 ; i < TIME_POINTS; i++)
-      {
-        lockedSignal[i][lockedSignalCount] = (averages[i] - lockedAverage[i]);
-      }
-            
-      lockedSignalCount++;   
-
-      if(lockedSignalCount > (ID_SET-1))
-      {
-        // We held on target until we collected a complete set of samples
-        // time to do target ID
-        //
-        targetDiscrimination();
-       
-        FLAG_TARGET_ID = false;
-        
-        // reset the locked signal
-        //
-        for(int i = 0; i < TIME_POINTS; i++)
-        {
-          lockedSignal[TIME_POINTS][0] = 0;
-        }         
-        lockedSignalCount = 0;    
-      }
-    }
-  }
-  // signal ?
-  //                  
-  if(tempF > THRESHOLD)                           // above our threshold ?
-  {         
-    //targetID = NO_TARGET; // reset
-                       
-    if(tempF > maxF)
-    {
-      maxF = tempF;
-      // going up (signal is increasing) 
-      // store the average signal (i.e our reference)
-      //
-      if ( !FLAG_TARGET_ID)  // not in ID mode yet
-      {
-        // Set the Target ID flag  'we are in target ID mode'
-        //
-        FLAG_TARGET_ID = true;
-        for(int i = 0; i < TIME_POINTS; i++)
-        {
-            lockedAverage[i] = longAverages[i];          
-        }
-        lockedSignalCount = 0;  // new set of samples 
-      //  Serial.println("*");
-        // reset the targetID count
-        // 
-        timerTargetID = 0;  
-      }      
-    }            
-  }
-  else
-  {
-    if(tempF < 0)
-    {   
-      maxF = 0; // reset the peak      
-    }      
-  }  
-}
-
-
-void COIL_20_1364::targetDiscrimination()
-{  
-  // not used
-
-}
 
 
 // called repeatedly every sample, i.e at up to 500Hz,
@@ -221,7 +91,7 @@ void COIL_20_1364::doSampleAveraging()
 // called repeatedly every sample, i.e at up to 500Hz,
 // must be efficient
 //
-void COIL_20_1364::doSampleAveragingMobile()
+void COIL_20_428::doSampleAveragingMobile()
 {
   static int averageCount = 0;  
 
@@ -312,24 +182,24 @@ float COIL_20_1364::getIRONValue(float ratio)
 // i.e If the pules/sample rate is 500Hz, we are sending 500 samples per second out the USB
 // If the buffer is 20, thenwe are sending 25 full sets per second
 //
-void COIL_20_1364::send()
+void COIL_20_428::send()
 {
-  static int sendSampleCount = 0;
+  int sendSampleCount = 0;
+  
+
+  for(sendSampleCount = 0 ; sendSampleCount < TIME_POINTS; sendSampleCount++)
+  {
    
-  Serial.print(averages[sendSampleCount]);
-  Serial.print(",");
+    Serial.print(averages[sendSampleCount]);
+    Serial.print(",");   
+  }
      
   
-  sendSampleCount++;
-  if(sendSampleCount >= TIME_POINTS)
-  {
-    sendSampleCount = 0;
-
-    // send sampleblock 'end' 
-    //
-    Serial.println("");
-  }
-
+  // send sampleblock 'end' 
+  //
+  Serial.println("");
+  Serial.flush();
+  
  
 
 }

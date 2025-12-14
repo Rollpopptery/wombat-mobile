@@ -1,6 +1,6 @@
 
-#ifndef COIL_20_1364_H
-#define COIL_20_1364_H
+#ifndef COIL_20_428_H
+#define COIL_20_428_H
 
 
 
@@ -45,15 +45,16 @@ const uint16_t V_PULSE_PERIOD = 88;
 // 9 = 225 uSec
 // 10 = 250 uSec
 //
-#define V_PULSE_WIDTH ( 7 )
+#define V_PULSE_WIDTH ( 5 )
 
 // The long sample delay
 // When does the Long sample occur ? , timed from the start of the pulse
 // in multiples of 25uSec
 // 
 // 40 = 1000 uSec after the START of the pulse
+// 10 = 250 uSec
 //
-#define V_LONG_SAMPLE_DELAY (40)
+#define V_LONG_SAMPLE_DELAY (10)
 
 
 int peakSampleCount = 0;  
@@ -64,7 +65,7 @@ int peakSampleCount = 0;
 float samples[TIME_POINTS][SAMPLE_BUFFER_LENGTH];
 
 
-class COIL_20_1364
+class COIL_20_428
 {
 
   public:  
@@ -83,14 +84,7 @@ class COIL_20_1364
   double iron = 0.0;
 
 
-  // called every sample average ~ 5 to 20 Hz
-  //
-  void targetSense();
-
-  // Do the target discrimination algorithm for this particular coil
-  //
-  void targetDiscrimination();
-
+ 
 
   TARGETID targetID;
    
@@ -163,4 +157,4 @@ float IRON_TABLE[IRON_TABLE_SIZE] = {\
  
 
 
-#endif // COIL_20_1364_H
+#endif // COIL_20_428_H

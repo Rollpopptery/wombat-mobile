@@ -131,23 +131,23 @@ void timer_DACOut_Interrupt(timer_callback_args_t __attribute((unused)) *p_args)
   if (pulse_counter == V_LONG_SAMPLE_DELAY)    
   {
      noInterrupts();
-    // take a single sample ~1 mSec  after our other samples
+    // take a single sample ~200 uSec  after our other samples
     // and subtract it from all our other samples
     //
     //*PFS_P107PFS_BY = 0x05;         // digitalWrite(monitorPinD7, HIGH)  
     longSample = 0;
-    for (sampleCounter = 0 ; sampleCounter < 4; sampleCounter++)
-    {
+   // for (sampleCounter = 0 ; sampleCounter < 4; sampleCounter++)
+  //  {
     *ADC140_ADCSR |= (0x01 << 15);  // Next ADC conversion = write to register c. 300nS
     while((*ADC140_ADCSR &= (0x01 << 15) ) != 0x0000);  // if things not setup right, endless loop    
 
-    longSample +=  *ADC140_ADDR01;  
-    }    
+    longSample =  *ADC140_ADDR01;  
+  //  }    
     interrupts();
 
     // divide by 4 (average of 4 samples)
     //
-    longSample >>= 2; 
+   // longSample >>= 2; 
 
     // subtract it from all our samples
     //

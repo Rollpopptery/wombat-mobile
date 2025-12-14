@@ -1,7 +1,7 @@
 /*
 ----------------------------------------------------------------------------
 
-WOMBAT PI Mobile Metal detector
+WOMBAT PI-MOBILE Metal detector
 Arduino UNO R4 Minima Version
 
 wombatpi.net
@@ -18,7 +18,7 @@ Last Modified:  07 Dec 2025
 #include "wombat_analog.h"
 #include "target_sense.h"
 
-#define BAUD_RATE (115200)
+#define BAUD_RATE (230400)
 
 #define MAX_TX_BUFFER (30)
 char txBuffer[MAX_TX_BUFFER];
@@ -64,19 +64,17 @@ void loop()
   {
     sampleReady = false;      
      
-    theCoil.doSampleAveragingMobile(); 
-    theCoil.send();  // send one value out USB
+    theCoil.doSampleAveragingMobile();     
     
 
     // Do our Discrimination and Target ID here if it's time
     //    
     // i.e If 600 Hz pulse rate, with 50-sample buffer, we will do this 600/50 = 12 times per second) 
     //
-    if (printOutCount++  > SAMPLE_BUFFER_LENGTH)
+    if (printOutCount++  > SAMPLE_COUNT_MAX)
     {  
-      printOutCount = 0;    
-      //theCoil.targetSense(); 
-      //theCoil.debug();     
+      printOutCount = 0; 
+      theCoil.send();
     } 
 
     // start off as large negative number and we don't need a separate startup counter

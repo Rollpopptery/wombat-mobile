@@ -10,8 +10,8 @@
 
 // Set the coil type here
 //
-#include "coil_20_1364.h"
-COIL_20_1364 theCoil;
+#include "coil_20_428.h"
+COIL_20_428 theCoil;
 
 
 
