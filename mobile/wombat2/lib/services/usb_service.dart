@@ -33,7 +33,7 @@ class UsbService {
     }
     
     await _port!.setPortParameters(
-      115200,
+      230400,
       UsbPort.DATABITS_8,
       UsbPort.STOPBITS_1,
       UsbPort.PARITY_NONE
@@ -44,6 +44,8 @@ class UsbService {
   }
 
   void _onDataReceived(Uint8List data) {
+    
+
     // Convert bytes to string and add to buffer
     String incoming = utf8.decode(data, allowMalformed: true);
     _buffer += incoming;
@@ -86,7 +88,7 @@ class UsbService {
       
       // Only emit if we have samples
       if (samples.isNotEmpty) {
-        _framesReceived++;
+        _framesReceived++;        
         _frameController.add(samples);
       }
     } catch (e) {

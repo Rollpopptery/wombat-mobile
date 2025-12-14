@@ -3,8 +3,7 @@ import 'dart:async';
 import '../services/usb_service.dart';
 import '../services/app_settings.dart';
 import '../services/calculated_plots.dart';
-
-
+import '../services/audio_service.dart';
 
 class VanWykChart extends StatefulWidget {
   final UsbService usbService;
@@ -32,11 +31,18 @@ class _VanWykChartState extends State<VanWykChart> {
   double? _maxY;
   double _previousScale = 1.0;
   Offset _previousFocalPoint = Offset.zero;
+
+  // Audio service
+  final AudioService _audioService = AudioService();
+  bool _audioEnabled = false;
   
   @override
   void initState() {
     super.initState();
+    _audioService.init();
     _subscription = widget.usbService.frameStream.listen((samples) {
+            
+
       _scanCounter++;
       if (_scanCounter % _scanDiv != 0) return;
       
@@ -49,36 +55,42 @@ class _VanWykChartState extends State<VanWykChart> {
       
       final settings = AppSettings();
 
-// Update running averages (only for non-ignored samples)
-for (int i = 0; i < samples.length && i < _runningAverageBuffers.length; i++) {
+      // Update running averages (only for visible samples)
+      for (int i = 0; i < samples.length && i < _runningAverageBuffers.length; i++) {
+        if (settings.isSampleVisible(i)) {  
+          _runningAverageBuffers[i].add(samples[i]);
+          if (_runningAverageBuffers[i].length > averageWindowSize) {
+            _runningAverageBuffers[i].removeAt(0);
+          }
+        }
+      }
 
-  if (settings.isSampleVisible(i)) {  
-    _runningAverageBuffers[i].add(samples[i]);
-    if (_runningAverageBuffers[i].length > averageWindowSize) {
-      _runningAverageBuffers[i].removeAt(0);
-    }
-  }
-}
+      // Calculate deviations from running average (only for visible samples)
+      List<double> deviations = [];
+      int displayedIndex = 0;
+      for (int i = 0; i < samples.length; i++) {
+        if (settings.isSampleVisible(i)) {
+          double average = _runningAverageBuffers[i].isEmpty 
+              ? samples[i] 
+              : _runningAverageBuffers[i].reduce((a, b) => a + b) / _runningAverageBuffers[i].length;
+          double deviation = samples[i] - average;
+          double stacked = deviation + ((samples.length - 1 - displayedIndex) * traceSpacing);
+          deviations.add(stacked);
+          displayedIndex++;
+        }
+      }
 
-// Calculate deviations from running average (only for non-ignored samples)
-List<double> deviations = [];
-int displayedIndex = 0;
-for (int i = 0; i < samples.length; i++) {
-  if (settings.isSampleVisible(i)) {
-    double average = _runningAverageBuffers[i].isEmpty 
-        ? samples[i] 
-        : _runningAverageBuffers[i].reduce((a, b) => a + b) / _runningAverageBuffers[i].length;
-    double deviation = samples[i] - average;
-    double stacked = deviation + ((samples.length - 1 - displayedIndex) * traceSpacing);
-    deviations.add(stacked);
-    displayedIndex++;
-  }
-}
-
-// Add sound plot as an additional trace
-double soundValue = CalculatedPlots.calculateSoundPlot(samples, settings);
-double soundStacked = soundValue + ((samples.length - 1 - displayedIndex) * traceSpacing);
-deviations.add(soundStacked);
+      // Add sound plot as an additional trace
+      double soundValue = CalculatedPlots.calculateSoundPlot(samples, settings);
+      double soundStacked = soundValue + ((samples.length - 1 - displayedIndex) * traceSpacing);
+       
+      
+      // Update audio with sound plot value (second time, with processing)
+      if (_audioEnabled) {
+        _audioService.updateSignal(soundValue);
+      }
+           
+      deviations.add(soundStacked);
       
       setState(() {
         _scanHistory.add(deviations);
@@ -86,12 +98,18 @@ deviations.add(soundStacked);
           _scanHistory.removeAt(0);
         }
       });
+      
+     
+
+        
+      
     });
   }
   
   @override
   void dispose() {
     _subscription?.cancel();
+    _audioService.dispose();
     super.dispose();
   }
 
@@ -172,6 +190,20 @@ deviations.add(soundStacked);
                   size: Size.infinite,
                 ),
               ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _audioEnabled = !_audioEnabled;
+            if (_audioEnabled) {
+              _audioService.start();
+            } else {
+              _audioService.stop();
+            }
+          });
+        },
+        backgroundColor: _audioEnabled ? Colors.red : Colors.green,
+        child: Icon(_audioEnabled ? Icons.volume_off : Icons.volume_up),
       ),
     );
   }
