@@ -80,19 +80,6 @@ void COIL_20_1364::doSampleAveragingMobile()
 }
 
 
-// Copy to temporary send buffer at set flag
-//
-void COIL_20_1364::dataBlockSend()
-  {
-    for(int i = 0 ; i < TIME_POINTS; i++)
-    {
-      // locked in time, so data in a single curve is all in sync
-      //
-      sendBuffer[i] = averages[i];
-    }
-    dataSendFlag = true;    
-  }
-
 
 
 
@@ -104,30 +91,17 @@ void COIL_20_1364::dataBlockSend()
 //
 void COIL_20_1364::send()
 {
-  static int countSamples = 0;
+  int countSamples = 0;
+  String bufferstr = "";
   
-  if(! dataSendFlag)
+  
+  for (int i = 0 ; i < TIME_POINTS; i++)
   {
-    return;
-  }  
-  
-
-  Serial.print(sendBuffer[countSamples]);
-  Serial.print(",");   
-  Serial.flush();
-  
-     
-  countSamples++;
-  if(countSamples >= TIME_POINTS)
-  {
-    countSamples = 0;
-    // send sampleblock 'end' 
-    //
-    Serial.println("");
-    Serial.flush();
-    dataSendFlag = false;
+    bufferstr += String(averages[i]);
+    bufferstr += (",");   
   }
-  
- 
+    
+  Serial.println(bufferstr); 
+   
 
 }

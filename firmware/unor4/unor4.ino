@@ -12,13 +12,13 @@ Last Modified:  07 Dec 2025
 ----------------------------------------------------------------------------
 */
 
-#define VERSION "07DEC2025"
+#define VERSION "21DEC2025"
 
 #include "wombat.h"
 #include "wombat_analog.h"
 #include "target_sense.h"
 
-#define BAUD_RATE (500000)
+#define BAUD_RATE (1000000)
 
 void setup() 
 {  
@@ -60,15 +60,8 @@ void loop()
   {
     sampleReady = false;      
      
-    theCoil.doSampleAveragingMobile();    
+    theCoil.doSampleAveragingMobile(); 
 
-    // send 3 samples (ie this happens at 450 Hz)
-    //
-    theCoil.send();
-    theCoil.send();
-    theCoil.send();
-   
-    
     
 
     // Do our Discrimination and Target ID here if it's time
@@ -78,7 +71,9 @@ void loop()
     if (printOutCount++  > SAMPLE_BUFFER_LENGTH)
     {  
       printOutCount = 0; 
-      theCoil.dataBlockSend();
+      
+      theCoil.send();
+  
     } 
 
    
