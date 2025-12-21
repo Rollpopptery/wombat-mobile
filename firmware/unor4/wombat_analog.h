@@ -3,7 +3,7 @@
 
 
 // x 3uSEc
-#define SAMPLE_COUNT_MAX (25)
+#define SAMPLE_COUNT_MAX (50)
 
 extern volatile int fineSweepCount;
 

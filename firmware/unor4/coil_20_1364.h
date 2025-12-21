@@ -1,6 +1,6 @@
 
-#ifndef COIL_20_428_H
-#define COIL_20_428_H
+#ifndef COIL_20_1364_H
+#define COIL_20_1364_H
 
 
 
@@ -10,26 +10,25 @@
 //
 #define TIME_POINTS (25)
 
+// we work with a block of samples on the early part of the curve
+// and another block of smaples on the late part of the curve
+// note we have a maximum of 50 raw samples SAMPLE_COUNT_MAX = 50
+//
+
+#define FIRST_BLOCK (15)
+
+
+// starting at ~ 60 uSec (3uSec x 20)
+//
+#define SECOND_BLOCK_OFFSET (20)   
+
 // The number of samples to average
 //
-#define SAMPLE_BUFFER_LENGTH (50)
-
-// the greater the number, the less often the main loop updates the sound
-//
-#define SOUND_UPDATE_COUNT (4)
+#define SAMPLE_BUFFER_LENGTH (20)
 
 
-// greater value means slower recovery, longer averaging
-//
-#define LONG_AVERAGE_FACTOR (5.0)
 
-// the number of samples we use when calculating a Median for target ID
-// don't change this
-//
-#define ID_SET (21)
-
-
-// The pulse period
+// The pulse period (pulse frequency)
 // in multiples of 25uSec
 // 133 = 300 Hz 
 // 88 = 450 Hz
@@ -41,11 +40,15 @@ const uint16_t V_PULSE_PERIOD = 88;
 
 // The pulse width
 // in multiples of 25uSec
+//
 // 3 = 75 uSec pulse width
+// 5 = 125 uSec
+// 6 = 150 uSec
+// 7 = 175 uSec
 // 9 = 225 uSec
 // 10 = 250 uSec
 //
-#define V_PULSE_WIDTH ( 5 )
+#define V_PULSE_WIDTH ( 7 )
 
 // The long sample delay
 // When does the Long sample occur ? , timed from the start of the pulse
@@ -53,10 +56,21 @@ const uint16_t V_PULSE_PERIOD = 88;
 // 
 // 40 = 1000 uSec after the START of the pulse
 // 10 = 250 uSec
-//
-#define V_LONG_SAMPLE_DELAY (10)
+// 11 = 275 uSec
+// 12 = 300 uSec
 
-#define SKIP_SAMPLES (0)
+#define V_LONG_SAMPLE_DELAY (12)
+
+
+// The offset in sampling x 3uSec
+// ie if 5, then first 5 samples are skipped at sampling, and the raw data set is 5x3uSec = 15uSec offset.
+// This is to ignore samples at the beginning of the coil discharge, that are irrelevant and too early.
+//
+
+// i.e The samples  from this coil start at 7 x 3uSec (21 uSec)
+//
+#define SKIP_SAMPLES (7)
+
 
 
 int peakSampleCount = 0;  
@@ -67,7 +81,7 @@ int peakSampleCount = 0;
 float samples[TIME_POINTS][SAMPLE_BUFFER_LENGTH];
 
 
-class COIL_20_428
+class COIL_20_1364
 {
 
   public:  
@@ -84,8 +98,7 @@ class COIL_20_428
 
   double conductivity = 0.0;
   double iron = 0.0;
-
-
+  
  
 
   TARGETID targetID;
@@ -94,8 +107,13 @@ class COIL_20_428
   // custom function that is called every sample
   // Performs averaging and signal processing using the raw sample set
   //
-  void doSampleAveraging();
+  
   void doSampleAveragingMobile();
+  void dataBlockSend();
+
+  bool dataSendFlag = false;
+
+  
 
   float getIRONValue(float ratio);
 
@@ -107,6 +125,11 @@ class COIL_20_428
   double sum_last = 0.0;
 
   double averages[TIME_POINTS] = {0.0};
+
+  // locked in time, data set to send
+  //
+  double sendBuffer[TIME_POINTS] = {0.0};
+  
   double longAverages[TIME_POINTS] = {0.0};
 
   double average_last = 0.0;
@@ -123,8 +146,7 @@ class COIL_20_428
 
   double lockedAverage[TIME_POINTS] = {0.0};
 
-  float lockedSignal[TIME_POINTS][ID_SET] = {0.0};
-  
+    
   int lockedSignalCount = 0;
  
   bool FLAG_TARGET_ID = false;
@@ -159,4 +181,4 @@ float IRON_TABLE[IRON_TABLE_SIZE] = {\
  
 
 
-#endif // COIL_20_428_H
+#endif // COIL_20_1364_H

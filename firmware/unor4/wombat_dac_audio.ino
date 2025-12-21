@@ -33,6 +33,7 @@ For wombat-mobile. Sound output not used
 #include "R4_defines.h"
 
 #include "voice.h"
+#include "wombat.h"
 
 FspTimer soundWave;
 
@@ -145,10 +146,7 @@ void timer_DACOut_Interrupt(timer_callback_args_t __attribute((unused)) *p_args)
   //  }    
     interrupts();
 
-    // divide by 4 (average of 4 samples)
-    //
-   // longSample >>= 2; 
-
+    
     // subtract it from all our samples
     //
     for(sampleCounter = 0 ; sampleCounter < SAMPLE_COUNT_MAX; sampleCounter++)
@@ -169,8 +167,18 @@ void timer_DACOut_Interrupt(timer_callback_args_t __attribute((unused)) *p_args)
     //
     *PFS_P104PFS_BY = 0x04;      // Pulse off on D3 
 
-    // do the sampling
-    //          
+    // !  do the sampling !
+    // 
+    // skip early samples
+    //
+    for(sampleCounter = 0 ; sampleCounter < SKIP_SAMPLES; sampleCounter++)
+    {       
+      *ADC140_ADCSR |= (0x01 << 15);  // Next ADC conversion = write to register c. 300nS
+      while((*ADC140_ADCSR &= (0x01 << 15) ) != 0x0000);  // if things not setup right, endless loop    
+      sampleArray[0] = *ADC140_ADDR01;              
+    } 
+
+             
     for(sampleCounter = 0 ; sampleCounter < SAMPLE_COUNT_MAX; sampleCounter++)
     {       
       *ADC140_ADCSR |= (0x01 << 15);  // Next ADC conversion = write to register c. 300nS

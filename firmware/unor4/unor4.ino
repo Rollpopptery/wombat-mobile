@@ -18,11 +18,7 @@ Last Modified:  07 Dec 2025
 #include "wombat_analog.h"
 #include "target_sense.h"
 
-#define BAUD_RATE (230400)
-
-#define MAX_TX_BUFFER (30)
-char txBuffer[MAX_TX_BUFFER];
-
+#define BAUD_RATE (500000)
 
 void setup() 
 {  
@@ -64,30 +60,27 @@ void loop()
   {
     sampleReady = false;      
      
-    theCoil.doSampleAveragingMobile();     
+    theCoil.doSampleAveragingMobile();    
+
+    // send 3 samples (ie this happens at 450 Hz)
+    //
+    theCoil.send();
+    theCoil.send();
+    theCoil.send();
+   
+    
     
 
     // Do our Discrimination and Target ID here if it's time
     //    
-    // i.e If 600 Hz pulse rate, with 50-sample buffer, we will do this 600/50 = 12 times per second) 
+    // i.e If 450 Hz pulse rate, with 25-sample buffer, we will do this 600/50 = 12 times per second) 
     //
-    if (printOutCount++  > SAMPLE_COUNT_MAX)
+    if (printOutCount++  > SAMPLE_BUFFER_LENGTH)
     {  
       printOutCount = 0; 
-      theCoil.send();
+      theCoil.dataBlockSend();
     } 
 
-    // start off as large negative number and we don't need a separate startup counter
-    //  
-    /*  
-    if (soundUpdateCount++ > SOUND_UPDATE_COUNT)
-    {
-      soundUpdateCount = 0;
-      //do the audio update 
-      //        
-      tempF = theCoil.soundSignal();
-      soundAlgorithm3(theCoil.soundSignalValue, theCoil.soundSignalConductivity);
-    }   
-    */
+   
   }
 } 
